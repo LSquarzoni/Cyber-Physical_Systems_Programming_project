@@ -26,7 +26,6 @@ class OdometryToTransformNode(Node):
         self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
 
     def odometry_callback(self, msg):
-        # self.get_logger().info('HHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEYYYYYYYYYYYYY')
         # Create a TransformStamped message
         t = TransformStamped()
 
