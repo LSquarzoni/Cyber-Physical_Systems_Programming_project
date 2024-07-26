@@ -50,11 +50,6 @@
     <limit lower="0" upper="0" effort="0" velocity="0"/>
   </joint>
   <link name="base_link">
-    <inertial>
-      <mass value="1.5"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="0.029125" ixy="0" ixz="0" iyy="0.029125" iyz="0" izz="0.055225"/>
-    </inertial>
     <collision name="base_link_inertia_collision">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -64,7 +59,7 @@
     <visual name="base_link_inertia_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://offboard_py/iris/meshes/iris.stl" scale="1 1 1"/>
+        <mesh filename="package://px4_offboard/meshes/iris.stl" scale="1 1 1"/>
       </geometry>
     </visual>
   </link>
@@ -90,7 +85,7 @@
     <visual name="iris_depth_camera__iris__rotor_0_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://offboard_py/iris/meshes/iris_prop_ccw.dae" scale="1 1 1"/>
+        <mesh filename="package://px4_offboard/meshes/iris_prop_ccw.dae" scale="1 1 1"/>
       </geometry>
     </visual>
   </link>
@@ -109,7 +104,7 @@
     <visual name="iris_depth_camera__iris__rotor_1_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://offboard_py/iris/meshes/iris_prop_ccw.dae" scale="1 1 1"/>
+        <mesh filename="package://px4_offboard/meshes/iris_prop_ccw.dae" scale="1 1 1"/>
       </geometry>
     </visual>
   </link>
@@ -128,7 +123,7 @@
     <visual name="iris_depth_camera__iris__rotor_2_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://offboard_py/iris/meshes/iris_prop_cw.dae" scale="1 1 1"/>
+        <mesh filename="package://px4_offboard/meshes/iris_prop_cw.dae" scale="1 1 1"/>
       </geometry>
     </visual>
   </link>
@@ -147,7 +142,7 @@
     <visual name="iris_depth_camera__iris__rotor_3_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://offboard_py/iris/meshes/iris_prop_cw.dae" scale="1 1 1"/>
+        <mesh filename="package://px4_offboard/meshes/iris_prop_cw.dae" scale="1 1 1"/>
       </geometry>
     </visual>
   </link>
@@ -173,7 +168,7 @@
     <visual name="iris_depth_camera__depth_camera__visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://offboard_py/realsense_camera/meshes/realsense.dae" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://px4_offboard/meshes/realsense.dae" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
   </link>
