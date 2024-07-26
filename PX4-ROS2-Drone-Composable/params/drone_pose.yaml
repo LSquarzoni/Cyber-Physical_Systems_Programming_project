@@ -1,8 +1,0 @@
-drone_pose:
-  ros__parameters:
-    base_frame: map
-    child_frame: base_link
-    pub:
-      pose: true
-      vel: true
-      path: true
