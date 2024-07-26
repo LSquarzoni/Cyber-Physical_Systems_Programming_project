@@ -4,8 +4,6 @@ from px4_msgs.msg import VehicleOdometry
 from geometry_msgs.msg import TransformStamped
 import tf2_ros
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy
-# import threading
-
 
 class OdometryToTransformNode(Node):
     def __init__(self):
@@ -26,15 +24,11 @@ class OdometryToTransformNode(Node):
             self.odometry_callback,
             self.qos)
         
-        # self.rate = self.create_rate(10000)  # 10 MHz rate
         # Create a TransformStamped message
         self.t = TransformStamped()
         
         # Create a TransformBroadcaster to publish transforms
         self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
-
-        # self.publish_thread = threading.Thread(target=self.publish_transform)
-        # self.publish_thread.start()
 
     def odometry_callback(self, msg):
         # self.get_logger().info("Odometry received!")
@@ -58,32 +52,6 @@ class OdometryToTransformNode(Node):
         self.t.transform.rotation.w = float(self.odom.q[0])
         # Publish the transform
         self.tf_broadcaster.sendTransform(self.t)
-
-    # def publish_transform(self):
-    #     rate = self.create_rate(2)  # 2 Hz rate
-    #     while rclpy.ok():
-    #         if self.odom is not None:
-    #             # Set the header frame_id to "map"
-    #             self.t.header.stamp = self.get_clock().now().to_msg()
-    #             self.t.header.frame_id = 'map'
-
-    #             # Set the child_frame_id to "base_link"
-    #             self.t.child_frame_id = 'base_link'
-
-    #             # Set the translation from the odometry message
-    #             self.t.transform.translation.x = float(self.odom.position[0])
-    #             self.t.transform.translation.y = float(self.odom.position[1])
-    #             self.t.transform.translation.z = float(self.odom.position[2])
-
-    #             # Set the rotation from the odometry message
-    #             self.t.transform.rotation.x = float(self.odom.q[0])
-    #             self.t.transform.rotation.y = float(self.odom.q[1])
-    #             self.t.transform.rotation.z = float(self.odom.q[2])
-    #             self.t.transform.rotation.w = float(self.odom.q[3])
-    #             # Publish the transform
-    #             self.tf_broadcaster.sendTransform(self.t)
-
-    #         self.rate.sleep()
 
 def main(args=None):
     rclpy.init(args=args)
