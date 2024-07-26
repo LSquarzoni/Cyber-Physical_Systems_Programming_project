@@ -48,14 +48,14 @@ class OdometryToTransformNode(Node):
 
         # Set the translation from the odometry message
         self.t.transform.translation.x = float(self.odom.position[0])
-        self.t.transform.translation.y = float(self.odom.position[1])
-        self.t.transform.translation.z = float(self.odom.position[2])
+        self.t.transform.translation.y = float(-self.odom.position[1])
+        self.t.transform.translation.z = float(-self.odom.position[2])
 
         # Set the rotation from the odometry message
-        self.t.transform.rotation.x = float(self.odom.q[0])
-        self.t.transform.rotation.y = float(self.odom.q[1])
-        self.t.transform.rotation.z = float(self.odom.q[2])
-        self.t.transform.rotation.w = float(self.odom.q[3])
+        self.t.transform.rotation.x = float(self.odom.q[1])
+        self.t.transform.rotation.y = float(-self.odom.q[2])
+        self.t.transform.rotation.z = float(-self.odom.q[3])
+        self.t.transform.rotation.w = float(self.odom.q[0])
         # Publish the transform
         self.tf_broadcaster.sendTransform(self.t)
 
