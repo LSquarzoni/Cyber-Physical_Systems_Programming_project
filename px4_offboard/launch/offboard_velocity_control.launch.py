@@ -1,69 +1,65 @@
 #!/usr/bin/env python3
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import Command, LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, LogInfo
+from launch.substitutions import LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription, ExecuteProcess
+from launch.launch_description_sources import AnyLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    # Get the package directory
-    package_dir = get_package_share_directory('px4_offboard')
+    # Get the parent directory
+    package_dir = os.path.expanduser('~/drone_ws/src/px4_offboard')
 
-    with open('/home/cpsuser/PX4-Autopilot/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models/iris_depth_camera/iris_depth_camera.urdf', 'r') as infp:
-        robot_desc = infp.read()
-    params = {'robot_description': robot_desc}
-    
-    # Define the URDF file name and its default path
-    urdf_file_name = 'urdf/iris_depth_camera.urdf'
-    urdf_default_path = os.path.join(package_dir, urdf_file_name)
+    # Define the URDF file paths
+    urdf_file_1_path = os.path.join(package_dir, 'urdf', 'iris_depth_camera_1.urdf')
+    urdf_file_2_path = os.path.join(package_dir, 'urdf', 'iris_depth_camera_2.urdf')
 
-    # Declare the launch argument for URDF path
-    declare_urdf_path_cmd = DeclareLaunchArgument(
-        name='urdf_path',
-        default_value=urdf_default_path,
-        description='Absolute path to robot URDF file'
-    )
-
-    # Command to parse the URDF file using xacro
-    robot_description_content = Command(
-        ['xacro ', LaunchConfiguration('urdf_path')]
-    )
-
-    # Node for robot state publisher
-    robot_state_publisher_node = Node(
+    # Robot 1 nodes
+    robot_state_publisher_1 = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
+        name='robot_state_publisher_1',
+        namespace='px4_1',
         output='screen',
-        parameters=[params]
+        parameters=[{'robot_description': open(urdf_file_1_path).read()}]
     )
 
-    # Node for joint state publisher
-    joint_state_publisher_node = Node(
+    joint_state_publisher_1 = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
-        name='joint_state_publisher',
+        name='joint_state_publisher_1',
+        namespace='px4_1',
         output='screen'
     )
 
-    # Nodes for various functionalities
+    # Robot 2 nodes
+    robot_state_publisher_2 = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher_2',
+        namespace='px4_2',
+        output='screen',
+        parameters=[{'robot_description': open(urdf_file_2_path).read()}]
+    )
+
+    joint_state_publisher_2 = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher_2',
+        namespace='px4_2',
+        output='screen'
+    )
+
+    # Other nodes
     visualize = Node(
         package='px4_offboard',
         namespace='px4_offboard',
         executable='visualizer',
         name='visualizer'
-    )
-
-    processes = Node(
-        package='px4_offboard',
-        namespace='px4_offboard',
-        executable='processes',
-        name='processes',
-        prefix='gnome-terminal --'
     )
 
     control = Node(
@@ -79,6 +75,13 @@ def generate_launch_description():
         namespace='px4_offboard',
         executable='velocity_control',
         name='velocity_control'
+    )
+
+    processes = Node(
+        package='px4_offboard',
+        namespace='px4_offboard',
+        executable='processes',
+        name='processes'
     )
 
     rviz = Node(
@@ -101,17 +104,35 @@ def generate_launch_description():
         name='map_base_link_publisher'
     )
 
-    # Return the LaunchDescription with all nodes and launch arguments
+    pointcloud_transformer = Node(
+        package='pointcloud_transformer',
+        executable='pointcloud_transformer',
+        name='pointcloud_transformer'
+    )
+
+    # Include other launch files (if needed)
+    octomap_launch = IncludeLaunchDescription(
+        AnyLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('octomap_server'),
+                'launch',
+                'octomap_mapping.launch.xml'
+            )
+        )
+    )
+
     return LaunchDescription([
-        declare_urdf_path_cmd,
-        robot_state_publisher_node,
-        joint_state_publisher_node,
+        robot_state_publisher_1,
+        joint_state_publisher_1,
+        robot_state_publisher_2,
+        joint_state_publisher_2,
         visualize,
-        processes,
         control,
         vel_control,
+        processes,
         rviz,
         map_publisher,
-        map_base_link_publisher
+        map_base_link_publisher,
+        pointcloud_transformer,
+        # octomap_launch
     ])
-

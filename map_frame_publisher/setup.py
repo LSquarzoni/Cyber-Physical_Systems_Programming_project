@@ -17,7 +17,6 @@ setup(
     maintainer_email='cpsuser@todo.todo',
     description='TODO: Package description',
     license='TODO: License declaration',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'map_frame_publisher = map_frame_publisher.map_frame_publisher:main',
