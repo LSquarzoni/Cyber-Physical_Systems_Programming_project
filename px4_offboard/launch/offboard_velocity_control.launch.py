@@ -55,12 +55,12 @@ def generate_launch_description():
     )
 
     # Other nodes
-    visualize = Node(
-        package='px4_offboard',
-        namespace='px4_offboard',
-        executable='visualizer',
-        name='visualizer'
-    )
+    # visualize = Node(
+    #     package='px4_offboard',
+    #     namespace='px4_offboard',
+    #     executable='visualizer',
+    #     name='visualizer'
+    # )
 
     control = Node(
         package='px4_offboard',
@@ -110,6 +110,12 @@ def generate_launch_description():
         name='pointcloud_transformer'
     )
 
+    pointcloud_combiner = Node(
+        package='pointcloud_combiner',
+        executable='pointcloud_combiner',
+        name='pointcloud_combiner'
+    )
+
     # Include other launch files (if needed)
     octomap_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
@@ -126,7 +132,7 @@ def generate_launch_description():
         joint_state_publisher_1,
         robot_state_publisher_2,
         joint_state_publisher_2,
-        visualize,
+        # visualize,
         control,
         vel_control,
         processes,
@@ -134,5 +140,6 @@ def generate_launch_description():
         map_publisher,
         map_base_link_publisher,
         pointcloud_transformer,
+        pointcloud_combiner
         # octomap_launch
     ])
