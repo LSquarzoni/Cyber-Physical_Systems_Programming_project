@@ -183,8 +183,8 @@ class OdometryToTransformNode(Node):
             self.t2.child_frame_id = 'base_link_2'
 
             # Set the translation from the odometry message
-            self.t2.transform.translation.x = float(self.glob_x_2 - self.glob_init_x_1 + self.loc_pos_2.x)
-            self.t2.transform.translation.y = float(self.glob_y_2 - self.glob_init_y_1 + self.loc_pos_2.y)
+            self.t2.transform.translation.x = float(self.glob_x_2 - self.glob_init_x_1) #  + self.loc_pos_2.x)
+            self.t2.transform.translation.y = float(self.glob_y_2 - self.glob_init_y_1) #  + self.loc_pos_2.y)
             self.t2.transform.translation.z = float(-self.loc_pos_2.z)
 
             # Set the rotation from the odometry message
