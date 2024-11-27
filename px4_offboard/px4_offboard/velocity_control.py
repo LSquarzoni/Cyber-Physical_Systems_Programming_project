@@ -56,43 +56,43 @@ class OffboardControl(Node):
     def __init__(self):
         super().__init__('minimal_publisher')
         qos_profile = QoSProfile(
-            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-            durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
-            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+            history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
 
         #Create subscriptions
         self.status_sub = self.create_subscription(
             VehicleStatus,
-            '/fmu/out/vehicle_status',
+            '/px4_1/fmu/out/vehicle_status',
             self.vehicle_status_callback,
             qos_profile)
         
         self.offboard_velocity_sub = self.create_subscription(
             Twist,
-            '/offboard_velocity_cmd',
+            '/px4_1/offboard_velocity_cmd',
             self.offboard_velocity_callback,
             qos_profile)
         
         self.attitude_sub = self.create_subscription(
             VehicleAttitude,
-            '/fmu/out/vehicle_attitude',
+            '/px4_1/fmu/out/vehicle_attitude',
             self.attitude_callback,
             qos_profile)
         
         self.my_bool_sub = self.create_subscription(
             Bool,
-            '/arm_message',
+            '/px4_1/arm_message',
             self.arm_message_callback,
             qos_profile)
 
 
         #Create publishers
-        self.publisher_offboard_mode = self.create_publisher(OffboardControlMode, '/fmu/in/offboard_control_mode', qos_profile)
-        self.publisher_velocity = self.create_publisher(Twist, '/fmu/in/setpoint_velocity/cmd_vel_unstamped', qos_profile)
-        self.publisher_trajectory = self.create_publisher(TrajectorySetpoint, '/fmu/in/trajectory_setpoint', qos_profile)
-        self.vehicle_command_publisher_ = self.create_publisher(VehicleCommand, "/fmu/in/vehicle_command", 10)
+        self.publisher_offboard_mode = self.create_publisher(OffboardControlMode, '/px4_1/fmu/in/offboard_control_mode', qos_profile)
+        self.publisher_velocity = self.create_publisher(Twist, '/px4_1/fmu/in/setpoint_velocity/cmd_vel_unstamped', qos_profile)
+        self.publisher_trajectory = self.create_publisher(TrajectorySetpoint, '/px4_1/fmu/in/trajectory_setpoint', qos_profile)
+        self.vehicle_command_publisher_ = self.create_publisher(VehicleCommand, "/px4_1/fmu/in/vehicle_command", 10)
 
         
         #creates callback function for the arm timer
@@ -116,15 +116,6 @@ class OffboardControl(Node):
         self.myCnt = 0
         self.arm_message = False
         self.failsafe = False
-
-        #states with corresponding callback functions that run once when state switches
-        self.states = {
-            "IDLE": self.state_init,
-            "ARMING": self.state_arming,
-            "TAKEOFF": self.state_takeoff,
-            "LOITER": self.state_loiter,
-            "OFFBOARD": self.state_offboard
-        }
         self.current_state = "IDLE"
         self.last_state = self.current_state
 
@@ -174,7 +165,7 @@ class OffboardControl(Node):
                 self.arm()
 
             case "OFFBOARD":
-                if(not(self.flightCheck) or self.arm_state == VehicleStatus.ARMING_STATE_DISARMED or self.failsafe == True):
+                if(not(self.flightCheck) or self.arm_state != VehicleStatus.ARMING_STATE_ARMED or self.failsafe == True):
                     self.current_state = "IDLE"
                     self.get_logger().info(f"Offboard, Flight Check Failed")
                 self.state_offboard()
@@ -188,32 +179,10 @@ class OffboardControl(Node):
 
         self.myCnt += 1
 
-    def state_init(self):
-        self.myCnt = 0
-
-    def state_arming(self):
-        self.myCnt = 0
-        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0)
-        self.get_logger().info("Arm command send")
-
-    def state_takeoff(self):
-        self.myCnt = 0
-        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_TAKEOFF, param1 = 1.0, param7=5.0) # param7 is altitude in meters
-        self.get_logger().info("Takeoff command send")
-
-    def state_loiter(self):
-        self.myCnt = 0
-        self.get_logger().info("Loiter Status")
-
     def state_offboard(self):
         self.myCnt = 0
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1., 6.)
-        self.offboardMode = True
-
-
-    
-
-        
+        self.offboardMode = True   
 
     # Arms the vehicle
     def arm(self):
@@ -264,20 +233,12 @@ class OffboardControl(Node):
     #receives Twist commands from Teleop and converts NED -> FLU
     def offboard_velocity_callback(self, msg):
         #implements NED -> FLU Transformation
-        self.velocity.x = -msg.linear.y
-        self.velocity.y = msg.linear.x
-        self.velocity.z = -msg.linear.z
-        self.yaw = msg.angular.z
-
         # X (FLU) is -Y (NED)
         self.velocity.x = -msg.linear.y
-
         # Y (FLU) is X (NED)
         self.velocity.y = msg.linear.x
-
         # Z (FLU) is -Z (NED)
         self.velocity.z = -msg.linear.z
-
         # A conversion for angular z is done in the attitude_callback function(it's the '-' in front of self.trueYaw)
         self.yaw = msg.angular.z
 

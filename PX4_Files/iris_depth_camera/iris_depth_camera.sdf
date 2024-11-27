@@ -1,7 +1,7 @@
 <!-- DO NOT EDIT: Generated from iris.sdf.jinja -->
 <sdf version='1.6'>
   <model name='iris'>
-    <link name='{{ base_link_name }}'>
+    <link name=''>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
@@ -25,13 +25,19 @@
         <surface>
           <contact>
             <ode>
-              <min_depth>0.001</min_depth>
-              <max_vel>0</max_vel>
+              <min_depth>0.01</min_depth>  <!-- Increase contact depth to stabilize ground contact -->
+              <max_vel>0.01</max_vel>         <!-- Lower max velocity for contact resolution -->
             </ode>
           </contact>
           <friction>
             <ode/>
+              <mu>2.0</mu>                  <!-- Increase friction coefficient -->
+              <mu2>2.0</mu2>
           </friction>
+          <bounce>
+            <restitution_coefficient>0</restitution_coefficient>  <!-- Set to zero for no bounce -->
+            <threshold>100000.0</threshold>
+          </bounce>
         </surface>
       </collision>
       <visual name='base_link_inertia_visual'>
@@ -52,11 +58,14 @@
       <gravity>1</gravity>
       <velocity_decay/>
     </link>
+    
+
+    
     <link name='/imu_link'>
       <pose>0 0 0.02 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.015</mass>
+        <mass>0.1</mass>  <!-- Increased mass for stabilization -->
         <inertia>
           <ixx>1e-05</ixx>
           <ixy>0</ixy>
@@ -69,7 +78,7 @@
     </link>
     <joint name='/imu_joint' type='revolute'>
       <child>/imu_link</child>
-      <parent>{{ base_link_name }}</parent>
+      <parent></parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -79,6 +88,7 @@
           <velocity>0</velocity>
         </limit>
         <dynamics>
+          <damping>0.02</damping>  <!-- Add damping to absorb vibrations -->
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -89,9 +99,9 @@
       <pose>0.13 -0.22 0.023 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.005</mass>
+        <mass>0.01</mass>  <!-- Slightly increased mass for stability -->
         <inertia>
-          <ixx>9.75e-07</ixx>
+          <ixx>1e-06</ixx>  <!-- Increased inertia values -->
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.000273104</iyy>
@@ -136,7 +146,7 @@
     </link>
     <joint name='rotor_0_joint' type='revolute'>
       <child>rotor_0</child>
-      <parent>{{ base_link_name }}</parent>
+      <parent></parent>
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
@@ -154,9 +164,9 @@
       <pose>-0.13 0.2 0.023 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.005</mass>
+        <mass>0.01</mass>  <!-- Slightly increased mass for stability -->
         <inertia>
-          <ixx>9.75e-07</ixx>
+          <ixx>1e-06</ixx>  <!-- Increased inertia values -->
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.000273104</iyy>
@@ -201,7 +211,7 @@
     </link>
     <joint name='rotor_1_joint' type='revolute'>
       <child>rotor_1</child>
-      <parent>{{ base_link_name }}</parent>
+      <parent></parent>
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
@@ -219,9 +229,9 @@
       <pose>0.13 0.22 0.023 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.005</mass>
+        <mass>0.008</mass>  <!-- Slightly increased mass for stability -->
         <inertia>
-          <ixx>9.75e-07</ixx>
+          <ixx>1e-06</ixx>  <!-- Increased inertia values -->
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.000273104</iyy>
@@ -266,7 +276,7 @@
     </link>
     <joint name='rotor_2_joint' type='revolute'>
       <child>rotor_2</child>
-      <parent>{{ base_link_name }}</parent>
+      <parent></parent>
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
@@ -284,9 +294,9 @@
       <pose>-0.13 -0.2 0.023 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.005</mass>
+        <mass>0.01</mass>  <!-- Slightly increased mass for stability -->
         <inertia>
-          <ixx>9.75e-07</ixx>
+          <ixx>1e-06</ixx>  <!-- Increased inertia values -->
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.000273104</iyy>
@@ -331,7 +341,7 @@
     </link>
     <joint name='rotor_3_joint' type='revolute'>
       <child>rotor_3</child>
-      <parent>{{ base_link_name }}</parent>
+      <parent></parent>
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
@@ -347,7 +357,7 @@
     </joint>
 
     <!-- Adding camera_link from depth_camera.sdf.jinja -->
-    <link name='{{ camera_link_name }}'>
+    <link name=''>
       <pose>0.1 0 0.025 0 0 0</pose>
       <inertial>
         <pose>0.01 0.025 0.025 0 0 0</pose>
@@ -369,10 +379,8 @@
           </mesh>
         </geometry>
       </visual>
-      <sensor name="depth_camera" type="depth">
-        {%- if ros_version == '2' -%}
-        <always_on>1</always_on>
-        <update_rate>10</update_rate>
+      <sensor name="depth_camera" type="depth"><always_on>1</always_on>
+        <update_rate>30</update_rate>  <!-- Increase the update rate for smoother data -->
         <camera name="camera_name">
           <horizontal_fov>1.5009831567</horizontal_fov>
           <image>
@@ -381,8 +389,8 @@
             <height>480</height>
           </image>
           <clip>
-            <near>0.001</near> <!-- Intel RealSense D455 -->
-            <far>65.535</far> <!-- Intel RealSense D455 -->
+            <near>0.1</near> <!-- Intel RealSense D455 -->
+            <far>60.0</far> <!-- Intel RealSense D455 -->
           </clip>
           <distortion>
             <k1>0.0</k1>
@@ -394,59 +402,30 @@
           </distortion>
         </camera>
 
-        <plugin name={{ camera_plugin_name }} filename="libgazebo_ros_camera.so">
-          <camera_name>{{ camera_name }}</camera_name>
-          <frame_name>{{ camera_link_name }}</frame_name>
+        <plugin name= filename="libgazebo_ros_camera.so">
+          <camera_name></camera_name>
+          <frame_name></frame_name>
           <hack_baseline>0.07</hack_baseline>
           <min_depth>0.2</min_depth>
-        </plugin>
-        {%- else -%}
-        <update_rate>10</update_rate>
-        <camera>
-          <horizontal_fov>1.5009831567</horizontal_fov>
-          <image>
-            <format>R8G8B8</format>
-            <width>848</width>
-            <height>480</height>
-          </image>
-          <clip>
-            <near>0.001</near> <!-- Intel RealSense D455 -->
-            <far>65.535</far> <!-- Intel RealSense D455 -->
-          </clip>
-        </camera>
-        <plugin filename="libgazebo_ros_openni_kinect.so" name={{ camera_plugin_name }}>
-          <cameraName>camera</cameraName>
-          <robotNamespace></robotNamespace>
-          <alwaysOn>true</alwaysOn>
-          <updateRate>10</updateRate>
-          <pointCloudCutoff>0.2</pointCloudCutoff>
-          <pointCloudCutoffMax>65.535</pointCloudCutoffMax>
-          <imageTopicName>rgb/image_raw</imageTopicName>
-          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
-          <depthImageTopicName>depth/image_raw</depthImageTopicName>
-          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
-          <pointCloudTopicName>depth/points</pointCloudTopicName>
-          <frameName>{{ camera_link_name }}</frameName>
-          <distortion_k1>0.0</distortion_k1>
-          <distortion_k2>0.0</distortion_k2>
-          <distortion_k3>0.0</distortion_k3>
-          <distortion_t1>0.0</distortion_t1>
-          <distortion_t2>0.0</distortion_t2>
-        </plugin>
-        {%- endif -%}
-      </sensor>
+          <max_depth>10</max_depth> <!-- Set an upper bound for realistic depth data -->
+          <!-- Low-pass filter settings -->
+          <filter type="low_pass">
+            <cutoff_frequency>5.0</cutoff_frequency>  <!-- Adjust cutoff frequency as needed -->
+            <gain>0.99</gain>  <!-- Adjust gain to control the intensity of smoothing -->
+          </filter>
+        </plugin></sensor>
     </link>
 
     <!-- Joint to attach the camera_link to the drone's base_link -->
     <joint name="camera_joint" type="fixed">
-      <parent>{{ base_link_name }}</parent>
-      <child>{{ camera_link_name }}</child>
+      <parent></parent>
+      <child></child>
     </joint>
 
 
     <plugin name='rosbag' filename='libgazebo_multirotor_base_plugin.so'>
       <robotNamespace/>
-      <linkName>{{ base_link_name }}</linkName>
+      <linkName></linkName>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
     <plugin name='front_right_motor_model' filename='libgazebo_motor_model.so'>
@@ -524,7 +503,7 @@
     </include>
     <joint name='gps0_joint' type='fixed'>
       <child>gps0::link</child>
-      <parent>{{ base_link_name }}</parent>
+      <parent></parent>
     </joint>
     <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
       <robotNamespace/>
@@ -549,20 +528,20 @@
       <magSubTopic>/mag</magSubTopic>
       <baroSubTopic>/baro</baroSubTopic>
       <mavlink_addr>INADDR_ANY</mavlink_addr>
-      <mavlink_tcp_port>{{ mavlink_tcp_port }}</mavlink_tcp_port>
-      <mavlink_udp_port>{{ mavlink_udp_port }}</mavlink_udp_port>
-      <serialEnabled>{{ serial_enabled }}</serialEnabled>
-      <serialDevice>{{ serial_device }}</serialDevice>
-      <baudRate>{{ serial_baudrate }}</baudRate>
+      <mavlink_tcp_port>4560</mavlink_tcp_port>
+      <mavlink_udp_port>14560</mavlink_udp_port>
+      <serialEnabled>0</serialEnabled>
+      <serialDevice>/dev/ttyACM0</serialDevice>
+      <baudRate>921600</baudRate>
       <qgc_addr>INADDR_ANY</qgc_addr>
       <qgc_udp_port>14550</qgc_udp_port>
       <sdk_addr>INADDR_ANY</sdk_addr>
       <sdk_udp_port>14540</sdk_udp_port>
-      <hil_mode>{{ hil_mode }}</hil_mode>
+      <hil_mode>0</hil_mode>
       <hil_state_level>0</hil_state_level>
-      <send_vision_estimation>0</send_vision_estimation>
+      <send_vision_estimation>1</send_vision_estimation> <!-- Enable vision data -->
       <send_odometry>1</send_odometry>
-      <enable_lockstep>1</enable_lockstep>
+      <enable_lockstep>1</enable_lockstep> <!-- Enable lockstep to sync simulation -->
       <use_tcp>1</use_tcp>
       <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       <control_channels>
@@ -661,20 +640,25 @@
           <joint_control_type>position</joint_control_type>
         </channel>
       </control_channels>
+      <groundTruthNoiseStdDev>0.005</groundTruthNoiseStdDev> <!-- Reduce noise std dev -->
+      <groundTruthBiasStdDev>0.005</groundTruthBiasStdDev> <!-- Reduce bias std dev -->
     </plugin>
     <static>0</static>
     <plugin name='rotors_gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
       <robotNamespace/>
       <linkName>/imu_link</linkName>
       <imuTopic>/imu</imuTopic>
-      <gyroscopeNoiseDensity>0.00018665</gyroscopeNoiseDensity>
-      <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+      <linearDamping>0.2</linearDamping>     <!-- Add linear damping -->
+      <angularDamping>0.2</angularDamping>   <!-- Add angular damping -->
+      <gyroscopeNoiseDensity>0.0000001</gyroscopeNoiseDensity>  <!-- Reduce noise density -->
+      <gyroscopeRandomWalk>0.0000001</gyroscopeRandomWalk>      <!-- Fine-tune if needed -->
       <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
-      <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
-      <accelerometerNoiseDensity>0.00186</accelerometerNoiseDensity>
-      <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
-      <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
-      <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
+      <gyroscopeTurnOnBiasSigma>0.0005</gyroscopeTurnOnBiasSigma>
+      <accelerometerNoiseDensity>0.0000001</accelerometerNoiseDensity>
+      <accelerometerRandomWalk>0.0000001</accelerometerRandomWalk>
+      <accelerometerBiasCorrelationTime>1000.0</accelerometerBiasCorrelationTime>
+      <accelerometerTurnOnBiasSigma>0.0005</accelerometerTurnOnBiasSigma>
     </plugin>
+    
   </model>
 </sdf>

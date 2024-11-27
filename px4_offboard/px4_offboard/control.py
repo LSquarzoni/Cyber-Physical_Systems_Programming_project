@@ -99,10 +99,10 @@ def main():
     )
 
 
-    pub = node.create_publisher(geometry_msgs.msg.Twist, '/offboard_velocity_cmd', qos_profile)
+    pub = node.create_publisher(geometry_msgs.msg.Twist, '/px4_1/offboard_velocity_cmd', qos_profile)
 
     arm_toggle = False
-    arm_pub = node.create_publisher(std_msgs.msg.Bool, '/arm_message', qos_profile)
+    arm_pub = node.create_publisher(std_msgs.msg.Bool, '/px4_1/arm_message', qos_profile)
 
 
     speed = 0.5

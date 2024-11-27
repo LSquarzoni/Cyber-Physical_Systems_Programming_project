@@ -24,13 +24,16 @@ setup(
     maintainer_email='braden@arkelectron.com',
     description='TODO: Package description',
     license='TODO: License declaration',
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
                 'offboard_control = px4_offboard.offboard_control:main',
                 'visualizer = px4_offboard.visualizer:main',
                 'velocity_control = px4_offboard.velocity_control:main',
                 'control = px4_offboard.control:main',
-                'processes = px4_offboard.processes:main'
+                'processes = px4_offboard.processes:main',
+                'drone_control = px4_offboard.drone_control:main',
+                'fly = px4_offboard.fly:main'
         ],
     },
 )

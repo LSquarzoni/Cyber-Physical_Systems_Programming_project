@@ -12,7 +12,7 @@ import os
 
 def generate_launch_description():
     # Get the parent directory
-    package_dir = os.path.expanduser('~/drone_ws/src/px4_offboard')
+    package_dir = os.path.expanduser('~/ROS2_ws/src/px4_offboard')
 
     # Define the URDF file paths
     urdf_file_1_path = os.path.join(package_dir, 'urdf', 'iris_depth_camera_1.urdf')
@@ -55,12 +55,12 @@ def generate_launch_description():
     )
 
     # Other nodes
-    # visualize = Node(
-    #     package='px4_offboard',
-    #     namespace='px4_offboard',
-    #     executable='visualizer',
-    #     name='visualizer'
-    # )
+    visualize = Node(
+        package='px4_offboard',
+        namespace='px4_offboard',
+        executable='visualizer',
+        name='visualizer'
+    )
 
     control = Node(
         package='px4_offboard',
@@ -89,7 +89,8 @@ def generate_launch_description():
         namespace='',
         executable='rviz2',
         name='rviz2',
-        arguments=['-d', os.path.join(package_dir, 'visualize.rviz')]
+        #arguments=['-d', os.path.join(package_dir, 'visualize.rviz')]
+        arguments=['-d', os.path.join(package_dir, 'RVIZconfig.rviz')]
     )
 
     map_publisher = Node(
@@ -115,7 +116,7 @@ def generate_launch_description():
         executable='pointcloud_combiner',
         name='pointcloud_combiner'
     )
-
+    
     # Include other launch files (if needed)
     octomap_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
@@ -132,14 +133,14 @@ def generate_launch_description():
         joint_state_publisher_1,
         robot_state_publisher_2,
         joint_state_publisher_2,
-        # visualize,
-        control,
-        vel_control,
+        #visualize,
+        #control,
+        #vel_control,
         processes,
         rviz,
         map_publisher,
         map_base_link_publisher,
         pointcloud_transformer,
-        pointcloud_combiner
-        # octomap_launch
+        pointcloud_combiner,
+        octomap_launch
     ])

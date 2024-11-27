@@ -7,6 +7,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(px4_msgs REQUIRED)
 
 add_executable(pointcloud_transformer src/pointcloud_transformer.cpp)
 
@@ -16,6 +17,7 @@ ament_target_dependencies(pointcloud_transformer
   pcl_ros
   tf2_ros
   geometry_msgs
+  px4_msgs
 )
 
 install(TARGETS

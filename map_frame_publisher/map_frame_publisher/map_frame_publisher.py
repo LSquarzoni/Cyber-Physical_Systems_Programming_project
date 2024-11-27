@@ -2,7 +2,6 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import TransformStamped
 import tf2_ros
-import numpy as np
 
 class MapFrameBroadcaster(Node):
     def __init__(self):
@@ -25,11 +24,12 @@ class MapFrameBroadcaster(Node):
         t.transform.translation.y = 0.0
         t.transform.translation.z = 0.0
         
-        # Set the orientation of the world frame (identity quaternion)
+        # Set the orientation of the world frame
         t.transform.rotation.x = 0.0
         t.transform.rotation.y = 0.0
         t.transform.rotation.z = 0.0
         t.transform.rotation.w = 1.0
+        
         # Broadcast the static transformation
         self.broadcaster.sendTransform(t)
 
