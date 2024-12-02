@@ -55,28 +55,6 @@ def generate_launch_description():
     )
 
     # Other nodes
-    visualize = Node(
-        package='px4_offboard',
-        namespace='px4_offboard',
-        executable='visualizer',
-        name='visualizer'
-    )
-
-    control = Node(
-        package='px4_offboard',
-        namespace='px4_offboard',
-        executable='control',
-        name='control',
-        prefix='gnome-terminal --'
-    )
-
-    vel_control = Node(
-        package='px4_offboard',
-        namespace='px4_offboard',
-        executable='velocity_control',
-        name='velocity_control'
-    )
-
     processes = Node(
         package='px4_offboard',
         namespace='px4_offboard',
@@ -133,9 +111,6 @@ def generate_launch_description():
         joint_state_publisher_1,
         robot_state_publisher_2,
         joint_state_publisher_2,
-        #visualize,
-        #control,
-        #vel_control,
         processes,
         rviz,
         map_publisher,
