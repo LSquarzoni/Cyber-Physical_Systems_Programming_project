@@ -1,4 +1,4 @@
-# <span style="color:green"> **Cyber-Physical Systems Programming - Documentation**</span>
+<span style="color:green"> **Cyber-Physical Systems Programming - Documentation**</span>
 
 The main goal of this work is the following: in a Gazebo environment we need to create the instances of 2 drones, equipped with the required sensors, like a depth camera, in order to build a 3D map of the simulated environment and localize the position of the drones themselves (SLAM algorithm = Simultaneous Localization and Mapping). The tools we will employ are ROS 2 and PX4 Autopilot.
 
