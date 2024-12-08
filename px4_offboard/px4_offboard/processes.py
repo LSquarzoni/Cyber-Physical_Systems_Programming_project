@@ -10,6 +10,7 @@ def main():
         "MicroXRCEAgent udp4 -p 8888",
 
         # Run the PX4 SITL simulation with spawning positions
+        # "cd ~/PX4-Autopilot && make px4_sitl gazebo-classic_iris_depth_camera__our_empty"
         "cd ~/PX4-Autopilot/Tools/simulation/gazebo-classic && ./sitl_multiple_run.sh -s iris_depth_camera:1:0:0,iris_depth_camera:1:3:3 -w our_empty"
     ]
 

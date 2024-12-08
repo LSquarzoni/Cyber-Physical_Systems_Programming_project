@@ -93,10 +93,10 @@ if __name__ == "__main__":
          'udp_onboard_gimbal_host_ip': args.udp_onboard_gimbal_host_ip, \
          'udp_onboard_gimbal_port_remote': args.udp_onboard_gimbal_port_remote, \
          'hil_mode': args.hil_mode, \
-	 'base_link_name': args.base_link_name, \
-	 'camera_plugin_name': args.camera_plugin_name, \
-	 'camera_name': args.camera_name, \
-	 'camera_link_name': args.camera_link_name, \
+	     'base_link_name': args.base_link_name, \
+	     'camera_plugin_name': args.camera_plugin_name, \
+	     'camera_name': args.camera_name, \
+	     'camera_link_name': args.camera_link_name, \
          'ros_version': ros_version}
 
     override_params_path = args.override_parameters_json_path
