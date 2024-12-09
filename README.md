@@ -6,302 +6,113 @@ The main goal of this work is the following: in a Gazebo environment we need to 
 >Lorenzo Grandi\
 >Lorenzo Squarzoni
 
-The following notebook requires **Ubuntu 22.04 LTS** (Jammy Jellyfish) to be executed.
+In the following document we'll explain all the steps required to execute a **Multiagent SITL SLAM**, based on two Iris drones equipped with a **depth camera**; the simulation will be carried out using Gazebo and Rviz2.
 
-In the following document we'll try to explain all the steps required to execute a **Multiagent SITL SLAM**, based on two Iris drones equipped with a **depth camera**; the simulation will be carried out using Gazebo and Rviz2.
+## <span style="color:lightgreen"> **Preliminary installations: ROS 2 Humble, PX4 Autopilot and Micro XRCE-DDS**</span>
 
-## <span style="color:lightgreen"> **Preliminary installations with ROS 2 Humble/Ubuntu 22.04**</span>
+**Ubuntu 22.04 LTS** (Jammy Jellyfish) must be installed on the PC.
 
-https://docs.ros.org/en/humble/Tutorials.html
+To proceed with the installation, follow the main guide within the PX4 dcumentation:
 
-https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html
+https://docs.px4.io/main/en/ros2/user_guide.html
 
+By default, from Ubuntu 22.04, PX4 comes with the newer Gazebo version (Gazebo Harmonic). If you want, as we did, work with the older version (Gazebo Classic), please follow this guide:
 
-```python
-!sudo apt install software-properties-common
-!sudo add-apt-repository universe
-```
-
-
-```python
-!sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
-!echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-```
-
-
-```python
-# ROS installation
-!sudo apt update
-!sudo apt upgrade
-!sudo apt install ros-humble-desktop
-
-!sudo apt install ros-dev-tools
-
-# Gazebo installation
-!sudo apt install libgazebo-dev
-!sudo apt install ros-humble-gazebo-ros-pkgs
-```
-
-
-```python
-# ALWAYS REMEMBER TO SOURCE THIS FILE (or add it in the .bashrc)
-!source /opt/ros/humble/setup.bash
-
-!echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc # To append it to the .bashrc file
-```
-
-https://docs.px4.io/main/en/dev_setup/dev_env_linux_ubuntu.html#ros-2
-
-
-```python
-# Download PX4
-!git clone https://github.com/PX4/PX4-Autopilot.git --recursive
-
-# Install
-!bash ./PX4-Autopilot/Tools/setup/ubuntu.sh -no-sim-tools --no-nuttx
-
-# Then restart computer
-
-# Additional dependencies
-!sudo apt-get install protobuf-compiler libeigen3-dev libopencv-dev -y
-```
-
-### **.SDF to .URDF confersion of the iris model**
-
-Since Rviz requires the drone's model to be in .urdf format, it is mandatory to convert the .sdf file of it to be readable.
-
-The URDF files we'll use in the simulation are specific for each drone and are located in the */px4_pffboard/urdf* folder.
-
-To show the drones' models in Rviz it is also required to take the **iris_depth_camera/meshes** folder from */px4_pffboard* and place it at the following address: *~/NAME_OF_YOUR_WORKSPACE/install/px4_offboard/share/px4_offboard*; this is not mandatory for the purpose of the simulation, but helps in better visualizing the process in Rviz.
+https://docs.px4.io/main/en/sim_gazebo_classic/
 
 ## <span style="color:lightgreen"> **Single drone simulation with PX4 in Gazebo**</span>
 
-### **Generic PX4 Gazebo simulation with IRIS drone**
+To run the basic single agent simulation, follow the guide at this link:
 
+https://docs.px4.io/main/en/ros2/user_guide.html#setup-the-agent
 
-```python
-!cd PX4-Autopilot # Always make sure to be in this folder
-!make px4_sitl gazebo-classic
+If you installed Gazebo Classic rather than Gazebo Harmonic, replace the command starting PX4 with the ones provided at this link, depending on the vehicle you want to spawn:
+
+https://docs.px4.io/main/en/sim_gazebo_classic/#running-the-simulation
+
+If you decide to use an iris drone quipped with a depth camera as we did, run:
+```Shell
+cd PX4_Autopilot
+make px4_sitl gazebo-classic_iris_depth_camera
 ```
-
-### **PX4 Gazebo simulation with IRIS depth camera .urdf file**
-
-
-```python
-!cd PX4_Autopilot
-!make px4_sitl gazebo_iris_depth_camera
-```
-
-These examples are generic and for testing purposes; in the final execution the models will be loaded from the launch file.
 
 ### **ROS2 and PX4 simulation baseline**
 
-Our execution starts with a single launch file, located in the ros workspace, inside the */src/px4_offboard/launch directory*. This script is responsible for running all the processes and ros nodes we need to accomplish the simulation; in particular, one important script, *processes.py*, opens 2 terminals, one that runs the MicroXRCE agent and another responsible for launching the gazebo simulation. The other nodes and functions executed are Rviz and all the packages we will see in detail later.
-
-The following code will be the baseline for our work. It is really important to correctly address the packages to execute.
-
-Before starting, other tools need to be downloaded and installed, like MicroXRCE itself and px4_msgs:
-
-
-```python
-# Micro XRCE installation
-!pip3 install --user -U empy pyros-genmsg setuptools
-!pip3 install kconfiglib
-!pip install --user jsonschema
-!pip install --user jinja2
-
-!git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-!cd Micro-XRCE-DDS-Agent
-!mkdir build
-!cd build
-!cmake ..
-!make
-!sudo make install
-!sudo ldconfig /usr/local/lib/
+The simulation is started by simply running the following commands from the shell:
+```Shell
+cd ros_ws
+. install/setup.bash
+ros2 launch px4_offboard offboard_velocity_control.launch.py
 ```
+The launch file is a very useful ROS2 tool, since it allows to run several nodes, set parameters and more all from a single file. In our case, it handles the execution of the *processes.py* script, which initiates Micro XRCE-DDS and the Gazebo simulation, as well as launching Rviz, which is used as monitoring environment, and all the ROS2 nodes required for the mapping, that will be discussed in detail later.
 
+Let's go through all the nodes and why they're needed.
 
-```python
-# Inside the /ROS2_ws/src directory
-!git clone https://github.com/PX4/px4_msgs.git
+#### **Map Frame publisher**
 
-!cd ..
-!pip install --user -U empy==3.3.4 pyros-genmsg setuptools
-!colcon build
-```
+The **map_frame_publisher** script creates the common reference */map* frame with respect to the */world* frame; the two frames are actually the same, but since we couldn't create a new frame without specifying its parent, we were forced to create both. These will be the root frames of the TF Tree of the simulation: the latter describes the relative positions of all coordinates frames existing in the simulated world, either associated to the environment (as */world* and */map*) or to the drones (we will see this in a moment).
 
-To use a different IRIS model file, as our .urdf one we need to change some lines in *~/NAME_OF_YOUR_WORKSPACE/src/ROS2_PX4_Offboard_Example/px4_offboard/px4_offboard/processes.py*:
+#### **Map Base Link publisher**
 
-> Run the PX4 SITL simulation \
-> "cd ~/PX4-Autopilot && make px4_sitl gz_x500"
+At *~/PX4-Autopilot/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models* one can find the *.sdf* files of all available vehicles: the *.sdf* file describes how all the vehicles are made in terms of shape, dimensions and sensors. In particular, every component of the vehicle is attached to a **link**, defined in terms of position and orientation.
 
-to:
+In the case of our iris drone equipped with the depth camera, the main link was *base_link* (this name is conventionally used for all models) while the sensor was associated to *camera_link*. This means that the Gazebo plugins will automatically publish the camera readings (image and pointcloud) on the corresponding ROS2 topic and those outputs will be referred to the *camera_link* frame.
 
-> Run the PX4 SITL simulation \
-> "cd ~/PX4-Autopilot && make px4_sitl gazebo-classic_iris_depth_camera__warehouse" # For the warehouse world \
-> or \
-> Run the PX4 SITL simulation \
-> "cd ~/PX4-Autopilot && make px4_sitl gazebo-classic_iris_depth_camera__our_empty" # For our simple world
+In order to achieve this, we must provide within the TF Tree all the transformations from */map* to */camera_link*, namely */map &rarr; /base_link &rarr; camera_link*.
 
+The scope of the **map_base_link_publ** is to provide the first transformation, from */map* to */base_link*. This operation requires to localize the drone in the environment, meaning to find its x, y, and z coordinates and orientation. These information were obtained by subscribing the */vehicle_local_position* and */vehicle_attitude* topics.
 
-```python
-# Source the code every time -> from ~/NAME_OF_YOUR_WORKSPACE
-!source ./install/setup.bash
-```
+Since PX4 and ROS2 use respectively ENU (East-North-Up) and NED (North-East-Down) frame conventions, we needed to apply the corresponding conversions to publish the correct */map* to */base_link* transformation(refer to https://docs.px4.io/main/en/ros2/user_guide.html#ros-2-px4-frame-conventions).
 
-The simulation will be launched with all the required processes, to add new topics or nodes it will be easier to add the corresponding commands directly in the .launch file.
+To provide the second transformation, from */base_link* to */camera_link* we used the **robot_state_publisher** (https://github.com/ros/robot_state_publisher/tree/humble) and **joint_state_publisher** (https://github.com/ros/joint_state_publisher/tree/ros2) ROS2 nodes: by providing the drone description through a *.urdf* file, these two nodes manage to publish all the transformations from any frame within the drone to */base_link*.
 
+The PX4 repository provides only the *.sdf* files of the vehicles, then we generate the *.urdf* file using the *pysdf* ROS package (https://github.com/andreasBihlmaier/pysdf). The result is the *iris_depth_camera.urdf* file within the *PX4_Files* folder.
 
-```python
-# To run the simulation
-!ros2 launch px4_offboard offboard_velocity_control.launch.py
-```
+#### **PointCloud transformer**
 
-At this point we are able to launch Gazebo and Rviz2 with a depth camera equipped drone, publishing the image of it and the associated point cloud that will be used to map the environment. At the beginning we mainly worked with a single drone, in order to understand the workflow required by ros and px4.
+Even though the TF tree was fully generated and published, the topics associated to the camera were not automatically referred to the */map* reference frame. Consequently, we relaized a new ROS2 node, **pointcloud_transformer**, in order to provide the correct transformation of the topic's data.
 
-In our project we faced a problem with the ROS topic correct publishing, where the data related to the sensor wasn't correctly linked to the map frame, leading to an incompatibility between the sensor itself and the octomap library. To solve this issue we needed to manually publish the topics and link it to the map frame, with the correct transformation.
+Further more, we integrated in this node some other functionalities to improve the final mapping result. In particular:
+- the ground is removed applying a filter to all data below 0.2 meters in the z direction;
+- the pointclouds are downsampled in order to speed up the transmittion of data and remove all possible delays;
+- based on the attitude topic of the drones, the data obtained when the drones are moving fast and rotating is removed, to avoid any drifting in the final octomap map; with a very little angle threshold we obtained a very good and clean result.
 
-### **Map Frame publishing**
-
-
-```python
-# To execute the first script we need additional packages
-!sudo apt install ros-humble-tf-transformations
-!pip install --upgrade transforms3d
-!pip install numpy==1.24
-
-# From ~/NAME_OF_YOUR_WORKSPACE, when the simulation in Gazebo and Rviz is running
-!source ./install/setup.bash
-!ros2 run map_frame_publisher map_frame_publisher
-```
-
-The **map_frame_publisher** script creates the common map frame with respect to the world frame; it doesn't apply any rotation or translation between them.
-
-### **Base_Link to Map transformation**
-
-
-```python
-# From ~/NAME_OF_YOUR_WORKSPACE, when the simulation in Gazebo and Rviz is running
-!source ./install/setup.bash
-!ros2 run map_base_link_publ map_base_link_publ
-```
-
-The **map_base_link_publ** script is extremely important, since it correctly connects the drones' specific frames to the common frame map: this operation has to be carried out in the right way to have a correct representation and visualization of the drones' positions in both gazebo and rviz2; since ROS2 and PX4 work with different coordinate systems it is mandatory to apply both translations and rotations between the frames, to move from an ENU system to a NED one: in our case we assigned the x value to y and viceversa and inverted the z axis, leading to the correct positioning of the frames. The second drone's position is obtained considering the initial offset between the two drones.
-
-### **PointCloud publishing with respect to Map**
-
-In addition we need to execute two more scripts in order to transform the pointcloud with respect to the map frame and use it for the mapping process:
-
-
-```python
-# From ~/NAME_OF_YOUR_WORKSPACE
-!source ./install/setup.bash
-!ros2 run pointcloud_transformer pointcloud_transformer
-```
-
-The first script, **pointcloud_transformer**, is responsible for correctly transforming the pointcloud coming from the drones' cameras with respect to the common frame map; for this no translations or rotations are required. 
-
-This code is denser than the previous ones, because all the manipulations we have to apply to these topics are executed within it: the ground is removed applying a filter to all data below 0.2 meters in the z direction, the pointclouds are downsampled in order to speed up the transmittion of data and remove all possible delays and finally, based on the attitude topic of the drones, the data obtained when the drones are moving fast and rotating is removed, to avoid any drifting in the final octomap map; with a very little angle threshold we obtained a very good and clean result.
+For all the pointcluds manipulations we used the *pcl_ros* ROS2 package (https://index.ros.org/p/pcl_ros/#humble-overview, https://docs.ros.org/en/humble/p/pcl_ros/index.html)
 
 ## <span style="color:lightgreen"> **Multiagent simulation with PX4 in Gazebo**</span>
 
-### **PointCloud combining**
+When using Gazebo and ROS2 for multi-agent simulations, it's essential to ensure that each vehicle has unique topic and frame names to prevent conflicts. PX4 helps manage this with specific scripts designed for multi-agent simulations. In particular:
+- **sitl_multiple_run.sh**: this shell script takes as inputs the vehicles type, the number of entities we want to spawn and the spawning coordinates.
+- **jinja_gen.py**: this script, called by the previous one, is responsible of the *.sdf* files for all the entities by using the corresponding *.sdf.jinja* templates.
+- **.sdf.jinja** file: it is a template-based version of an *.sdf* file, that allows to embed logic and variables in a text file, turning what normally is a static file into a dynamic one. In our case, the properties that must vary between vehicles are replaced by variables, with values passed as parameters by the **jinja_gen.py** script.
 
-All the previous scripts were written and tested with a single drone; once their functioning was correct, we translated them to work with more than one agent. Other changes were done to move into a multiagent scenario, as we'll see in a minute.
+This partially helped us, but it was not sufficient for the following reasons:
+- only some models come with the corresponding *sdf.jinja* template, and our iris drone with depth camera is not one of those;
+- the previous scripts only account for different topics namespaces and proper MAVLink communication, but not for differentiated frames naming that is crucial for the camera's data publication.
 
+Consequently we managed to write the *iris_depth_camera.sdf.jinja* template, which provides differentiated frames and topics naming for the camera, and we integrated these additional features also in the *sitl_multiple_run.sh* and *jinja_gen.py* in order to use the same workflow as in default PX4.
 
-```python
-# From ~/NAME_OF_YOUR_WORKSPACE
-!source ./install/setup.bash
-!ros2 run pointcloud_combiner pointcloud_combiner
-```
+In addition, we extended all the previously discussed ROS2 nodes to a multiagent context. This led us to a fully working simulation, with two spawned drones and the corresponding cameras' readings published on the relative topics.
 
-The final script, **pointcloud_combiner**, takes the two transformed and filtered pointclouds and joins them in one single topic, in order to feed it to the octomap process.
+### **PointCloud combiner**
 
-For ease, all these four executions will be added to the launch file.
+The last step before the final mapping was to merge the pointclouds coming from the drones' cameras into a single pointcloud: for this scope the **pointcloud_combiner** node was realized, that takes the two transformed and filtered pointclouds and joins them in one single topic, in order to feed it to the mapping process. Again, refer to the *pcl_ros* package documenation.
 
-### **OctoMap Mapping**
+### **OctoMap**
 
-Version for ROS 2 Humble
+As mapping tool for our simulation we used **Octomap** (https://octomap.github.io/): it produces a 3D Occupancy grid showing all the obstacles detected in the environment. Once the mapping is finished, the result can also be saved and imported in future simulations.
 
+To run Octomap the *octomap_mapping.launch.xml* launch file within the *octomap_server* (https://github.com/OctoMap/octomap_mapping) package must be executed. In this file it is possible to specify both the reference frame, */map* in our case, and the topic where the pointcloud to be used as input of the mapping algorithm is going to be published (in our case, this pointcloud is th result of the merging process of the ones coming from the individual drones).
 
-```python
-!sudo apt-get install ros-humble-octomap-mapping
-
-!sudo nautilus # Command required too modify the launch file as needed
-# The data will then be located at /opt/ros/humble/share/octomap_server/launch/ --> insert the topic "/pointcloud_wrt_map" and the frame_id as "map"
-
-!ros2 launch octomap_server octomap_mapping.launch.xml # To launch the mapping
-```
-
-The mapping will be generated as a MarkerArray, specifically as a topic called */occupied_cells_vis_array*.
-
-It is fundamental to insert the correct topic for the input pointcloud and the frame id into the octomap server launch file.
-
-### **Multiagent files**
-
-To make the multivehicle simulation possible, some files needs to be copied into the PX4 folder or changed:
-
-from the */PX4_Files* folder take the files and place (replace the already exisiting files if present) them in the following folders:
-- *sitl_multiple_run.sh* --> *~/PX4-Autopilot/Tools/simulation/gazebo-classic/*
-- *jinja_gen.py* --> *~/PX4-Autopilot/Tools/simulation/gazebo-classic/sitl_gazebo-classic/scripts/*
-- *iris_depth_camera.sdf.jinja* --> *~/PX4-Autopilot/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models/iris_depth_camera/*
-
-From the from folder take the file *our_empty.world* and place it in *~/PX4-Autopilot/Tools/simulation/gazebo-classic/sitl_gazebo-classic/worlds/*. After that, go to *~PX4-Autopilot/src/modules/simulation/simulator_mavlink* and open **sitl_targets_gazebo-classic.cmake** and write 'our_empty' among the names all other already existing worlds (from line 110 to 120)
-
-In the *launch* directory in the *px4_offboard* package folder open the launch file. At line 15 replace *drone_ws* with the name of your ROS2 worksapce
-
-**TO RUN THE SIMULATION** from terminal:
-
-
-```python
-!cd ~/NAME_OF_YOUR_WORKSPACE
-!colcon build # If you need to compile
-!source ./install/setup.bash
-!ros2 launch px4_offboard offboard_velocity_control.launch.py
-```
-
-The Gazebo simulation is launched by the python script *processes.py* at ~/NAME_OF_YOUR_WORKSPACE/src/px4_offboard/px4_offboard with the command:
-
-cd ~/PX4-Autopilot/Tools/simulation/gazebo-classic && ./sitl_multiple_run.sh -s iris_depth_camera:1:0:0,iris_depth_camera:1:3:3 -w our_empty
-
-The syntax is --> ./sitl_multiple_run.sh -s MODEL1:N° OF ENTITES:X_COORD:Y_COORD,MODEL2:N° OF ENTITES:X_COORD:Y_COORD, ...
-
-**BRIEF EXPLAINATION OF HOW ALL THIS WORKS**:
-
-In Gazebo/ROS when multiple entities exist, they must have different frames, topics ecc ecc names. For other models (like *iris*) everything is already managed by PX4 & Co (to each entity is assigned a namespace px4_1, px4_2 ecc,  so each topic name will start with /px4_N/...), but not for the *iris_depth_camera* model.
-
-When the *sitl_multiple_run.sh* file is executed it calls the *jinja_gen.py* script that uses the *.sdf.jinja* file of the desired model to generate all the sdf files for all the entities: the sdf.jinja file is like a generic sdf file where the things that must be different among the entities to avoid conflicts are not assigned to a fixed value or have fixed names, but these values/names are received from the sitl_multiple_run.sh and jinja_gen.py files.
-
-The sdf.jinja file for the iris_depth_camera model didn't exist, so we created one where we said that the base_link and camera_link frames and something more in the camera_plugin have names taken as parameters from the two scripts. In this way for example the first drone will have *base_link_1* and *camera_link_1* and the second one will have *base_link_2* and *camera_link_2* as frames names.
-
-We also created two .urdf files with matching frames names to publish all the frames using the robot_state_publisher nodes.
-
-With all this we are able to see the cameras data from all the drones and to create the topics refered to the map frame (pointcloud_wrt_map) to create the Octomap!
-
-**PROBLEMS**:
-
-In the single vehicle simulation the map->base_link transform was published starting form the data taken from the topic /fmu/out/vehicle_odometry but with 2 drones this doesn't work: the odometry corresponds to the relative position and orientation of the drone from its initial position and orientation, so if the drone doesn't move the odometry will be always 0 0 0 ... . With two drones, both will have odometries equal to 0 0 0 if they don't move, so if we publish the transform map->base_link_1 and map->base_link_2 using the odometry the frames of the two drones will overlap. We tried using other topics like *local_position* but the result is the same. So we need either the absolute position of the drones with respect to the world or to set the initial offset between drone 1 and 2.
-
-These problems have been solved implementing the right manipulations in the 4 packages we described before.
+The result of the mapping can be monitored by showing in Rviz2 the topic called */occupied_cells_vis_array* of type *MarkerArray*.
 
 ### **Drones movements in the environment**
 
-Now we need to control the drones' movement and make them map the whole environment. We want the process to be repeatable, for this reason we'll use a C++ script, built as a ROS package called **px4_drones_control**. 
+Now we need to control the drones movement and make them mapping the whole environment. We want the process to be repeatable, for this reason we'll use a C++ script, built as a ROS2 package called **px4_drones_control**. 
 
-The script initially shows the trails that each drone will follow, characterized by a sequence of waypoints with the XYZ coordinates; the drones need to be armed and set to offboard mode before starting; a series of functions manage the movement of the drones, setting the trajectory they have to follow, the velocity and the change in the direction the drones are facing and the reaching of the points is managed with a simple distance computation.
+The script initially shows the trails that each drone will follow, characterized by a sequence of waypoints with the XYZ coordinates. The drones need to be armed and set to offboard mode before starting, then a series of functions will manage the movement of the drones, setting the trajectory they have to follow in terms of position, orientation and velocity. To asses whether a setpoint has been reached a simple distance computation is carried out.
 
-We could control the movement also taking advantage of QGroundControl:
-
-
-```python
-# To install QGC
-!wget https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.AppImage
-!chmod +x ./QGroundControl.AppImage
-
-# To launch QGC
-!./QGroundControl.AppImage
-```
+We could control the movement also taking advantage of QGroundControl (https://docs.qgroundcontrol.com/master/en/qgc-user-guide/getting_started/download_and_install.html#ubuntu):
 
 In our simulation is important to set some specific parameters before starting, in particular we need to deactivate the Manual Control Input setting required for safety reasons, in order to avoid to incurr into the Failsafe Mode. To do so we have to set  COM_RCL_EXCEPT = 4.
 
@@ -309,8 +120,7 @@ To specify these parameters there are many approaches, like using the px4 MAVLin
 
 go to **PX4-Autopilot/ROMFS/px4fmu_common/init.d-posix/** and add these lines to the file **px4-rc.params**:
 
-
-```python
+```Shell
 param set COM_ARM_WO_GPS 1  # Warning only when the GPS preflight check fails
 param set COM_RCL_EXCEPT 4  # RC loss ignored and failsafe not triggered in offboard mode
 param set COM_RC_IN_MODE 4  # Stick input disabled
@@ -326,13 +136,12 @@ Then the PX4 folder needs to be compiled to make the changes effective.
 
 Once this is done we can proceed by setting the offboard mode and arming the drones in a separate terminal. The execution of this process cannot be inserted into the main launch file, because it would raise an error, not seeing all the topics and resources needed.
 
-
-```python
-# To run the drone_control script
-!cd ~/NAME_OF_YOUR_WORKSPACE
-!colcon build # If you need to compile
-!source ./install/setup.bash
-!ros2 run px4_drones_control px4_drones_control
+To run the script:
+```Shell
+cd ros_ws
+colcon build
+source ./install/setup.bash
+ros2 run px4_drones_control px4_drones_control
 ```
 
 ## <span style="color:lightgreen"> **Results**</span>
