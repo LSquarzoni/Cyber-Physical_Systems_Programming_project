@@ -74,7 +74,7 @@ Even though the TF tree was fully generated and published, the topics associated
 
 Further more, we integrated in this node some other functionalities to improve the final mapping result. In particular:
 - the ground is removed applying a filter to all data below 0.2 meters in the z direction;
-- the pointclouds are downsampled in order to speed up the transmittion of data and remove all possible delays;
+- the pointclouds are downsampled in order to speed up the transmission of data and remove all possible delays;
 - based on the attitude topic of the drones, the data obtained when the drones are moving fast and rotating is removed, to avoid any drifting in the final octomap map; with a very little angle threshold we obtained a very good and clean result.
 
 For all the pointcluds manipulations we used the *pcl_ros* ROS2 package (https://index.ros.org/p/pcl_ros/#humble-overview, https://docs.ros.org/en/humble/p/pcl_ros/index.html)
