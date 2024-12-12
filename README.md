@@ -30,7 +30,7 @@ If you installed Gazebo Classic rather than Gazebo Harmonic, replace the command
 
 https://docs.px4.io/main/en/sim_gazebo_classic/#running-the-simulation
 
-If you decide to use an iris drone quipped with a depth camera as we did, run:
+If you decide to use an iris drone equipped with a depth camera as we did, run:
 ```Shell
 cd PX4_Autopilot
 make px4_sitl gazebo-classic_iris_depth_camera
